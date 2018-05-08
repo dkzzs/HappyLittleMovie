@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import re
 import csv
 import time
+import datetime
 
 
 class USAV():
@@ -25,7 +26,10 @@ class USAV():
         magnet_dict = {}
         torrent_urls = self.get_torrent_urls(self.page)
         for name, url in torrent_urls.items():
-            html = request.urlopen(request.Request(url, headers=self.HEADERS)).read().decode('utf-8')
+            try:
+                html = request.urlopen(request.Request(url, headers=self.HEADERS)).read().decode('utf-8')
+            except:
+                continue
             pattern = re.compile("magnet.*(?=\">)")
             match = pattern.search(html).group()
             time.sleep(1)
@@ -36,10 +40,11 @@ class USAV():
 if __name__ == '__main__':
     crawler = USAV()
     magnet_list = crawler.get_magnets()
+    today = datetime.date.today()
     with open('outputs/us_magnet_list.csv','w',newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         for key,value in magnet_list.items():
-            writer.writerow([key,value])
+            writer.writerow([today,key,value])
         csvfile.close()
 
 
